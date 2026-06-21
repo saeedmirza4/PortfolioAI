@@ -443,15 +443,21 @@ with st.sidebar:
   
 
 # ── Page Router ────────────────────────────────────────────────────────────────
+import importlib
+
 if page == "Investor Profile":
     from _pages import profile
+    importlib.reload(profile)
     profile.render()
 elif page == "Recommendations":
     from _pages import recommendations
+    importlib.reload(recommendations)
     recommendations.render()
 elif page == "Portfolio Optimizer":
     from _pages import optimizer
+    importlib.reload(optimizer)
     optimizer.render()
 elif page == "Final Dashboard":
     from _pages import dashboard
+    importlib.reload(dashboard)
     dashboard.render()

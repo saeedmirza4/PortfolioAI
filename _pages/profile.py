@@ -15,15 +15,16 @@ def render():
                 "Investment Amount (PKR)",
                 min_value=100000,
                 max_value=100000000,
-                value=5000000,
+                value=st.session_state.get("investment_amount", 5000000),
                 step=100000,
                 help="Minimum 100,000 PKR"
             )
         with c2:
+            durations = ["1 Year", "2 Years", "3 Years", "5 Years", "7 Years", "10 Years"]
             duration = st.selectbox(
                 "Investment Duration",
-                ["1 Year", "2 Years", "3 Years", "5 Years", "7 Years", "10 Years"],
-                index=3
+                durations,
+                index=durations.index(st.session_state.get("investment_duration", "5 Years"))
             )
 
         c3, c4 = st.columns(2, gap="medium")
@@ -31,14 +32,14 @@ def render():
             risk = st.select_slider(
                 "Risk Appetite",
                 options=["Conservative", "Low", "Medium", "High", "Aggressive"],
-                value="Medium"
+                value=st.session_state.get("risk_appetite", "Medium")
             )
         with c4:
             target_return = st.number_input(
                 "Target Return (%)",
                 min_value=5,
                 max_value=100,
-                value=30,
+                value=st.session_state.get("target_return", 30),
                 step=5
             )
 
@@ -51,26 +52,27 @@ def render():
             preferred = st.multiselect(
                 "Preferred Sectors",
                 all_sectors,
-                default=["Banking", "Energy"]
+                default=st.session_state.get("preferred_sectors", ["Banking", "Energy"])
             )
         with c6:
             excluded_options = [s for s in all_sectors if s not in preferred]
             excluded = st.multiselect(
                 "Excluded Sectors",
                 excluded_options,
-                default=[]
+                default=[s for s in st.session_state.get("excluded_sectors", []) if s not in preferred]
             )
 
         st.markdown('<div class="section-label">Additional Preferences</div>', unsafe_allow_html=True)
 
         c7, c8 = st.columns(2, gap="medium")
         with c7:
-            dividend_pref = st.checkbox("Prefer dividend-paying stocks", value=True)
+            dividend_pref = st.checkbox("Prefer dividend-paying stocks", value=st.session_state.get("dividend_preference", True))
         with c8:
-            diversify = st.checkbox("Enforce sector diversification", value=True)
+            diversify = st.checkbox("Enforce sector diversification", value=st.session_state.get("enforce_diversification", True))
 
         notes = st.text_area(
             "Custom Notes (optional)",
+            value=st.session_state.get("custom_notes", ""),
             placeholder="e.g. Avoid crypto-related stocks. Focus on blue-chip companies.",
             height=80
         )
@@ -82,9 +84,20 @@ def render():
             generate = st.button("Generate Recommendation", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
         with bcol2:
-            st.button("Save Profile", use_container_width=True)
+            save = st.button("Save Profile", use_container_width=True)
 
-        if generate:
+        # ── Save to session_state ──────────────────────────────────────────────
+        if save or generate:
+            st.session_state["investment_amount"]       = amount
+            st.session_state["investment_duration"]     = duration
+            st.session_state["risk_appetite"]           = risk
+            st.session_state["target_return"]           = target_return
+            st.session_state["preferred_sectors"]       = preferred
+            st.session_state["excluded_sectors"]        = excluded
+            st.session_state["dividend_preference"]     = dividend_pref
+            st.session_state["enforce_diversification"] = diversify
+            st.session_state["custom_notes"]            = notes
+            st.session_state["profile_saved"]           = True
             st.success("Profile saved. Navigate to **Recommendations** to view results.")
 
     with col_right:
